@@ -25,9 +25,11 @@ vector<double> SensorFusion::getPolarCoordinate(double ob_x, double ob_y, double
 
     cout << "camera_x: " << camera_x << ", camera_y: " << camera_y
          << ", r: " << r << ", theta: " << theta << endl;
-
+    
     return {r, theta};
 }
+
+// ################################################################
 
 int main()
 {
@@ -56,15 +58,7 @@ int main()
     for (int i = 0; i < x.size(); i++)
     {
         // Compute lidar obstacles into camera polar coordinate
-        camera_x = current_x[i] + BASELINK_TO_CAMERA * cos(current_yaw[i]);
-        camera_y = current_y[i] + BASELINK_TO_CAMERA * sin(current_yaw[i]);
-        r = sqrt(pow(x[i] - camera_x, 2) + pow(y[i] - camera_y, 2));
-        radius.push_back(r);
-        theta = atan2(y[i] - camera_y, x[i] - camera_x) - current_yaw[i];
-        lidar_theta.push_back(theta);
-
-        cout << "camera_x: " << camera_x << ", camera_y: " << camera_y
-             << ", r: " << r << ", theta: " << theta << endl;
+        vector<double> polar = getPolarCoordinate(x[i], y[i], current_x[i], current_y[i], current_yaw[i]);
     }
 
     for (int i = 0; i < img_x.size(); i++)

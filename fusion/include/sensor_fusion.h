@@ -19,6 +19,11 @@ class SensorFusion
   double rad2deg(double angle);
   vector<double> getPolarCoordinate(double ob_x, double ob_y, double car_x, double car_y, double car_yaw);
 
-}
+
+
+
+};
+
+
 
 #endif // SENSOR_FUSION_H_
