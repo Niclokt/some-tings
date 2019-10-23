@@ -42,6 +42,8 @@ vector<double> SensorFusion::getImgObsAngle(double fov, double img_size, double 
 
 
 
+
+
 // ################################################################
 
 int main()
@@ -77,7 +79,12 @@ int main()
     for (int i = 0; i < img_x.size(); i++)
     {
         // TODO: compute image obstacles' theta angle
-       vector<double> theta = getImgObsAngle(double fov[i], double img_shape[i], double img_x[i]);
+        double alpha = deg2rad(fov / 2);
+
+        double img_theta = atan(tan(alpha) * ((img_shape[0] / 2) - img_x[i]) / (img_shape[0] / 2));
+        camera_theta.push_back(img_theta);
+
+        cout << "alpha: " << alpha << ", img_theta: " << img_theta << endl;
     }
 
     for (int i = 0; i < lidar_theta.size(); i++)
