@@ -2,10 +2,18 @@
 
 #define BASELINK_TO_CAMERA 2.2 // in [m]
 
-using std::cout;
-using std::endl;
-using std::max;
-using std::vector;
+
+//using std::cout;
+//using std::endl;
+//using std::max;
+//using std::vector;
+
+// Constructor
+SensorFusion::SensorFusion(){};
+
+
+// Destructor
+SensorFusion::~SensorFusion() {};
 
 constexpr double pi() { return M_PI; }
 double deg2rad(double angle) 
@@ -14,7 +22,7 @@ double deg2rad(double angle)
 }
 double rad2deg(double angle) { return angle / pi() * 180; }
 
-vector<double> SensorFusion::getPolarCoordinate(double ob_x, double ob_y, double car_x, double car_y, double car_yaw)
+std::vector<double> SensorFusion::getPolarCoordinate(double ob_x, double ob_y, double car_x, double car_y, double car_yaw)
 {
     // Compute lidar obstacles into camera polar coordinate
     double camera_x = car_x + BASELINK_TO_CAMERA * cos(car_yaw);
@@ -23,32 +31,39 @@ vector<double> SensorFusion::getPolarCoordinate(double ob_x, double ob_y, double
 
     double theta = atan2(ob_y - camera_y, ob_x - camera_x) - car_yaw;
 
-    cout << "camera_x: " << camera_x << ", camera_y: " << camera_y
-         << ", r: " << r << ", theta: " << theta << endl;
+    std::cout << "camera_x: " << camera_x << ", camera_y: " << camera_y
+         << ", r: " << r << ", theta: " << theta << std::endl;
     
     return {r, theta};
 }
 
-vector<double> SensorFusion::getImgObsAngle(double fov, double img_size, double img_width)
+std::vector<double> SensorFusion::getImgObsAngle(double fov, double img_size, double img_width)
 {
     // Get image obstacle's thteta angle
   double alpha = deg2rad(fov / 2);
 
-  double img_theta = atan(tan(alpha) * ((img_size[0] / 2) - img_width[i]) / (img_size[0] / 2));
+  double img_theta = atan(tan(alpha) * ((img_size/ 2) - img_width) / (img_size/ 2));
   camera_theta.push_back(img_theta);
   
-  cout << "alpha: " << alpha << ", img_theta: " << img_theta << endl;
+  std::cout << "alpha: " << alpha << ", img_theta: " << img_theta << std::endl;
 }
 
-
+std::vector<double> SensorFusion::addCamObsData(double ob_x, double ob_y, double lidar_theta, double radius)
+{
+    // Add Camera Data
+  fused_obstacles.push_back({ob_x[i], ob__y[i], lidar_theta[i], radius[i]}); // to include camera data
+  std::cout << fused_obstacles[k][0] << " " << fused_obstacles[k][1] << " " << fused_obstacles[k][2] << " " << fused_obstacles[k][3] << std::endl;
+}
 
 // ################################################################
 
 int main()
 {
+    SensorFusion fusion_object = SensorFusion();
+
     // Camera Properties
-    const double fov = 78; //in deg
-    const vector<double> img_shape = {640, 480};
+    double fov = 78; //in deg
+    const std::vector<double> img_shape = {640, 480};
     double tolerance = 0.035; // in radians
     int k = 0;
     bool flag = 0;
@@ -56,28 +71,28 @@ int main()
     // double x, y, current_x, current_y, current_yaw, l;
     double camera_x, camera_y, r, theta;
 
-    vector<double> radius;
-    vector<double> x = {3, 3};
-    vector<double> y = {5, 4};
-    vector<double> current_x = {0, 2};
-    vector<double> current_y = {0, 1};
-    vector<double> current_yaw = {M_PI / 2, -M_PI / 2};
-    vector<double> lidar_theta, camera_theta;
-    vector<vector<double>> fused_obstacles;
+    std::vector<double> radius;
+    std::vector<double> x = {3, 3};
+    std::vector<double> y = {5, 4};
+    std::vector<double> current_x = {0, 2};
+    std::vector<double> current_y = {0, 1};
+    std::vector<double> current_yaw = {M_PI / 2, -M_PI / 2};
+    std::vector<double> lidar_theta, camera_theta;
+    
 
-    vector<double> img_x = {500, 29};
-    vector<double> img_y = {};
+    std::vector<double> img_x = {500, 29};
+    std::vector<double> img_y = {};
 
     for (int i = 0; i < x.size(); i++)
     {
         // Compute lidar obstacles into camera polar coordinate
-        vector<double> polar = getPolarCoordinate(x[i], y[i], current_x[i], current_y[i], current_yaw[i]);
+        std::vector<double> polar = fusion_object.getPolarCoordinate(x[i], y[i], current_x[i], current_y[i], current_yaw[i]);
     }
 
     for (int i = 0; i < img_x.size(); i++)
     {
         // TODO: compute image obstacles' theta angle
-       vector<double> theta = getImgObsAngle(double fov[i], double img_shape[i], double img_x[i]);
+       std::vector<double> theta = fusion_object.getImgObsAngle(fov, img_shape, img_x[i]);
     }
 
     for (int i = 0; i < lidar_theta.size(); i++)
@@ -86,8 +101,7 @@ int main()
         {
             if (abs(lidar_theta[i] - camera_theta[j]) <= tolerance)
             {
-                fused_obstacles.push_back({x[i], y[i], lidar_theta[i], radius[i]}); // to include camera data
-                cout << fused_obstacles[k][0] << " " << fused_obstacles[k][1] << " " << fused_obstacles[k][2] << " " << fused_obstacles[k][3] << endl;
+                fusion_object.addCamObsData(x[i], y[i], lidar_theta[i], radius[i]);
                 k++;
                 flag = 1;
                 break;
@@ -96,8 +110,8 @@ int main()
 
         if (flag == 0)
         {
-            fused_obstacles.push_back({x[i], y[i], lidar_theta[i], radius[i]}); // to include camera data
-            cout << fused_obstacles[k][0] << " " << fused_obstacles[k][1] << " " << fused_obstacles[k][2] << " " << fused_obstacles[k][3] << endl;
+            fused_obstacles.push_back({x[i], y[i], lidar_angle[i], r[i]}); // to include camera data
+            std::cout << fused_obstacles[k][0] << " " << fused_obstacles[k][1] << " " << fused_obstacles[k][2] << " " << fused_obstacles[k][3] << std::endl;
             k++;
         }
 

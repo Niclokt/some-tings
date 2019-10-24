@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+  <env name="ROSCONSOLE_CONFIG_FILE" value="$(find agv)/config/rosconsole.config"/>
+
+
+<!-- Path planner -->
+  <node name="sensor_fusion" pkg="agv" type="sensor_fusion" output="screen">
+    
+    <!-- Hyperparameters -->
+    <param name="camera_fov"            value="78"/>
+    <param name="tolerance_for_comparison"            value="0.035"/>
+    <param name="image_dimensions"            value="{640, 480}"/> 
+    
+    
+
+  </node>
+
+
+</launch>
