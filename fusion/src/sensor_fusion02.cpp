@@ -236,8 +236,8 @@ void SensorFusion::obstacleCallback(const obstacle_detector::Obstacles::ConstPtr
 		
     obstacles.push_back({x, y, r, vx, vy});
 
-    scan_obstacle_x = obstacles[0];
-    scan_obstacle_y = obstacles[1];
+    scan_obstacle_x[i] = obstacles[i][0]; //check if order of array is correct
+    scan_obstacle_y[i] = obstacles[i][1];
 	}
 	return;
 }
@@ -255,7 +255,9 @@ void SensorFusion::obstacle2Callback(const obstacle_detector::Obstacles::ConstPt
 		double vx = obstacle_msg->circles[i].velocity.x;
 		double vy = obstacle_msg->circles[i].velocity.y;
 		obstacles_2.push_back({x, y, r, vx, vy});
-	}
+    
+    image_obstacle_x[i] = obstacles_2[i][0]; //check if order of array is correct
+
 	return;
 }
 
