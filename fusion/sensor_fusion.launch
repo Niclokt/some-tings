@@ -10,7 +10,7 @@
     <param name="fusion_frequency"            value="20"/>
     <param name="camera_fov"                  value="78"/>
     <param name="tolerance_for_comparison"    value="0.035"/>
-    <param name="image_dimensions"            value="{640, 480}"/> 
+    <param name="image_dimensions"            value="640"/> 
     
   </node>
 
