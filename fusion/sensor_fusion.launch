@@ -10,8 +10,11 @@
     <param name="fusion_frequency"            value="20"/>
     <param name="camera_fov"                  value="78"/>
     <param name="tolerance_for_comparison"    value="0.035"/>
-    <param name="image_dimensions"            value="640"/> 
-    
+
+    <param name="odom_topic"                  value="/odom/filtered"/>
+    <param name="obstacle_topic"              value="/obstacle"/>
+    <param name="obstacle2_topic"             value="/obstacle_2"/>
+    <param name="camera_obstacle_topic"       value="/detection_results"/>
   </node>
 
 

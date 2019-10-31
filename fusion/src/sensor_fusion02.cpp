@@ -108,6 +108,12 @@ SensorFusion::SensorFusion() : tf_listener(tf_buffer)
   ROS_ASSERT(private_nh.getParam("fusion_frequency", fusion_frequency_));
   ROS_ASSERT(private_nh.getParam("camera_fov", FOV_));
   ROS_ASSERT(private_nh.getParam("tolerance_for_comparison", tolerance));
+  
+  ROS_ASSERT(private_nh.getParam("odom_topic", odom_topic_));
+	ROS_ASSERT(private_nh.getParam("obstacle_topic", obstacle_topic_));       
+	ROS_ASSERT(private_nh.getParam("obstacle2_topic", obstacle2_topic_));
+  ROS_ASSERT(private_nh.getParam("camera_obstacle_topic", camera_obstacle_topic_));
+
   // ROS_ASSERT(private_nh.getParam("image_dimensions", img_size));
 
   // Subscribe & Advertise
