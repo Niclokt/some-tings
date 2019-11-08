@@ -50,7 +50,7 @@ private:
 
   vector<vector<double>> camera_pose; //Position of camera in world map [x, y]
   vector<vector<double>> obstacle_in_image; // position of obstacle in image [class_id, width, height, depth, centre x, centre y]
-  vector<vector<double>> obstacle_wrtGlobal; //3D obstacle data wrt World Frame [class_id, width, height, obstacle_x, obstacle_y]
+  vector<vector<double>> obstacle_wrtGlobal; //3D obstacle data wrt World Frame [class_id, width/2, height/2, obstacle_x, obstacle_y]
 
   
   // ROS Subscribers
@@ -90,7 +90,6 @@ Deprojection::Deprojection() : tf_listener(tf_buffer)
   // ROS_ASSERT (to assign constant values in launch file. No need to compile when changes are made to these values)
   ROS_ASSERT(private_nh.getParam("fusion_frequency", fusion_frequency_)); //do we need a freq??
   ROS_ASSERT(private_nh.getParam("camera_fov", FOV_));
-  // ROS_ASSERT(private_nh.getParam("tolerance_for_comparison", tolerance));
   
   ROS_ASSERT(private_nh.getParam("odom_topic", odom_topic_));
 	// ROS_ASSERT(private_nh.getParam("obstacle_topic", obstacle_topic_));       
@@ -197,7 +196,7 @@ void Deprojection::deprojectImage()
 
     //Find delta x & y of obstacle from camera 
     double delta_x = obstacle_in_image[i][3] * cos(car_yaw);
-    double delta_y = obstacle_in_image[i][4] * sin(car_yaw);
+    double delta_y = obstacle_in_image[i][3] * sin(car_yaw);
 
     //Find pose of obstacles wrt global frame
     double obstacle_x = camera_pose[i][0] + delta_x;
@@ -205,9 +204,9 @@ void Deprojection::deprojectImage()
 
     //obstacle_in_image [class_id, radius, height, depth, center_x, center_y]
     //Save 3D obstacle data into 2D vector [class_id, radius, height, x, y]
-    obstacle_wrtGlobal[i][0] = obstacle_in_image[0];  //class_id 
-    obstacle_wrtGlobal[i][1] = obstacle_in_image[1];  //radius
-    obstacle_wrtGlobal[i][2] = obstacle_in_image[2];  //height
+    obstacle_wrtGlobal[i][0] = obstacle_in_image[i][0];  //class_id 
+    obstacle_wrtGlobal[i][1] = obstacle_in_image[i][1];  //radius
+    obstacle_wrtGlobal[i][2] = obstacle_in_image[i][2];  //height
     obstacle_wrtGlobal[i].push_back(obstacle_x);
     obstacle_wrtGlobal[i].push_back(obstacle_y);  //x, y
   }
