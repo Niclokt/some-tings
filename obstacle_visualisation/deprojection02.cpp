@@ -82,31 +82,29 @@ Deprojection::Deprojection() : tf_listener(tf_buffer)
 
   // topics
 	std::string odom_topic_;
-	std::string obstacle_topic_;
-	std::string obstacle2_topic_;
+  std::string deprojection_topic_;
+	// std::string obstacle_topic_;
+	// std::string obstacle2_topic_;
   std::string camera_obstacle_topic_;
-	std::string fusion_topic_;
 
   // ROS_ASSERT (to assign constant values in launch file. No need to compile when changes are made to these values)
   ROS_ASSERT(private_nh.getParam("fusion_frequency", fusion_frequency_)); //do we need a freq??
   ROS_ASSERT(private_nh.getParam("camera_fov", FOV_));
-  ROS_ASSERT(private_nh.getParam("tolerance_for_comparison", tolerance));
+  // ROS_ASSERT(private_nh.getParam("tolerance_for_comparison", tolerance));
   
   ROS_ASSERT(private_nh.getParam("odom_topic", odom_topic_));
-	ROS_ASSERT(private_nh.getParam("obstacle_topic", obstacle_topic_));       
-	ROS_ASSERT(private_nh.getParam("obstacle2_topic", obstacle2_topic_));
+	// ROS_ASSERT(private_nh.getParam("obstacle_topic", obstacle_topic_));       
+	// ROS_ASSERT(private_nh.getParam("obstacle2_topic", obstacle2_topic_));
   ROS_ASSERT(private_nh.getParam("camera_obstacle_topic", camera_obstacle_topic_));
 
   // ROS_ASSERT(private_nh.getParam("image_dimensions", img_size));
 
   // Subscribe & Advertise
   odom_sub = nh.subscribe(odom_topic_, 1, &SensorFusion::odomCallback, this);
-  obstacle_sub = nh.subscribe(obstacle_topic_, 1, &SensorFusion::obstacleCallback, this);
-  obstacle2_sub = nh.subscribe(obstacle2_topic_, 1, &SensorFusion::obstacle2Callback, this);
   camera_obstacle_sub = nh.subscribe(camera_obstacle_topic_, 1, &SensorFusion::cameraObstacleCallback, this);
 
   // publish to another topic
-  fused_obstacles_pub = nh.advertise<Float64MultiArray>(fusion_topic_, 1);
+  deprojected_obstacle_pub = nh.advertise<obstacle_detector::Obstacles>(deprojection_topic_, 1);
 
   // Initialize the timer
   timer = nh.createTimer(ros::Duration(1.0 / fusion_frequency_), &SensorFusion::mainTimerCallback, this);
@@ -173,7 +171,7 @@ void Deprojection::cameraImageCallBack()
   for (i=0; i < obstacle_msg->data.size(); i++)
   {
     double class_id = obstacle_msg->data[0];
-    double radius = (obstacle_msg->data[2])/2;  //Find Radius of Obstacle
+    double radius = obstacle_msg->data[2];  //Find Radius of Obstacle
     double height = obstacle_msg->data[3];
     //double depth = obstacle_msg->data[];  //Find index no of depth info
     double center_x = obstacle_msg->data[4];
@@ -210,12 +208,13 @@ void Deprojection::deprojectImage()
     obstacle_wrtGlobal[i][0] = obstacle_in_image[0];  //class_id 
     obstacle_wrtGlobal[i][1] = obstacle_in_image[1];  //radius
     obstacle_wrtGlobal[i][2] = obstacle_in_image[2];  //height
-    obstacle_wrtGlobal[i].push_back(obstacle_x, obstacle_y);  //x, y
+    obstacle_wrtGlobal[i].push_back(obstacle_x);
+    obstacle_wrtGlobal[i].push_back(obstacle_y);  //x, y
   }
   return;
 }
 
-publishDeprojectionResult()
+void Deprojection::publishDeprojectionResult()
 {
   obstacle_detector::Obstacles deprojection_msg;
   
@@ -226,14 +225,14 @@ publishDeprojectionResult()
     deprojection_msg.circles[i].center.x = obstacle_wrtGlobal[i][3];    //obstacle_x
     deprojection_msg.circles[i].center.y = obstacle_wrtGlobal[i][4];    //obstacle_y
 
-    // if (obstacle_wrtGlobal[i][0] != 0) 
-    // {
-    //   deprojection_msg.circles[i].radius = obstacle_wrtGlobal[i][0]; // Data stored inside is actually class id
-    // }
-    // else 
-    // {
-    //   deprojection_msg.circles[i].radius = 0;
-    // }
+    if (obstacle_wrtGlobal[i][0] != 0) 
+    {
+      deprojection_msg.circles[i].radius = obstacle_wrtGlobal.at(i).at(0); //safer way of accessing memory .at() function wont crash just give error
+    }
+    else 
+    {
+      deprojection_msg.circles[i].radius = 0;
+    }
       
   }
   deprojected_obstacle_pub.publish(deprojection_msg);
